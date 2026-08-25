@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Silent Gear Solved &amp; Alloy Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+
+<div id="fatalErrorBanner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9999; background:#c85454; color:#fff; padding:12px 18px; font-family:monospace; font-size:13px; white-space:pre-wrap;"></div>
+<div class="grain"></div>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <div class="brand">
+      <span class="eyebrow">Silent Gear · Material Tool</span>
+      <h1>Silent Gear Solved</h1>
+      <p class="tagline">Drop in your material export, use the filters below, and it'll rank every material and every valid forged alloy from best to worst.</p>
+    </div>
+    <div class="furnace-signature" aria-hidden="true">
+      <svg viewBox="0 0 120 120" width="90" height="90">
+        <circle cx="60" cy="60" r="52" class="ring-track"/>
+        <circle id="heroRing" cx="60" cy="60" r="52" class="ring-fill"/>
+        <text x="60" y="56" class="ring-label-top">SYN</text>
+        <text x="60" y="75" class="ring-label-bottom">1.00x</text>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- STEP 1: UPLOAD -->
+  <section id="uploadSection" class="panel upload-panel">
+    <div class="panel-head">
+      <span class="step-tag">01</span>
+      <h2>Load a material export</h2>
+    </div>
+    <p class="hint">Upload your tsv file here. Gotten by using '/sgear mats dump' in any modpack with silent gears installed.</p>
+
+    <label id="dropzone" for="fileInput" class="dropzone">
+      <input type="file" id="fileInput" accept=".tsv,.txt,text/tab-separated-values" hidden>
+      <div class="dz-icon">⛃</div>
+      <div class="dz-text">
+        <strong>Choose a file</strong> or drag it here
+      </div>
+    </label>
+
+    <div class="upload-actions">
+      <span id="fileStatus" class="file-status"></span>
+    </div>
+    <div id="uploadError" class="error-box" hidden></div>
+  </section>
+
+  <!-- MAIN APP (hidden until data loaded) -->
+  <div id="app" hidden>
+
+    <div class="data-strip panel">
+      <div>
+        <strong id="dataFileName"></strong>
+        <span id="dataSummary" class="muted"></span>
+      </div>
+      <button id="reloadBtn" class="btn btn-ghost btn-sm" type="button">Load a different file</button>
+    </div>
+
+    <!-- STEP 2: STAT CHECKLIST -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="step-tag">02</span>
+        <h2>What do you value?</h2>
+      </div>
+      <p class="hint">Pick the stats to rank by, highest final value wins.</p>
+      <div class="checklist-toolbar">
+        <button id="statsAllBtn" class="btn btn-ghost btn-sm" type="button">Select all</button>
+        <button id="statsNoneBtn" class="btn btn-ghost btn-sm" type="button">Clear</button>
+        <span id="statsCount" class="muted"></span>
+      </div>
+      <div id="statChecklist" class="stat-grid"></div>
+    </section>
+
+    <!-- STEP 3: TABS -->
+    <section class="panel tabs-panel">
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" data-tab="single" role="tab">Single Materials</button>
+        <button class="tab-btn" data-tab="alloy" role="tab">Forged Alloys</button>
+      </div>
+
+      <!-- TAB 1 -->
+      <div id="tab-single" class="tab-panel active">
+        <div class="filter-row">
+          <label class="field-label">Part type
+            <select id="singleTypeFilter"></select>
+          </label>
+          <label class="field-label checkbox-field">
+            <input type="checkbox" id="singleHideExamples" checked>
+            Hide template/example entries
+          </label>
+        </div>
+        <div id="singleResults" class="results-list"></div>
+        <div id="singlePager" class="pager"></div>
+      </div>
+
+      <!-- TAB 2 -->
+      <div id="tab-alloy" class="tab-panel">
+        <div class="alloy-config">
+
+          <div class="alloy-config-row">
+            <label class="field-label">Silent Gear version
+              <select id="versionBucket">
+                <option value="pre402">3.0.0 – 4.0.1 (no Super Mixer · 4 slots elsewhere)</option>
+                <option value="402to414">4.0.2 – 4.1.4 (+ Super Mixer · 4 slots)</option>
+                <option value="415plus" selected>4.1.5 – 4.2.1 (6 slots · Super Mixer 8 slots)</option>
+              </select>
+            </label>
+          </div>
+          <div class="alloy-config-row">
+            <label class="field-label">Machines available
+              <div class="chip-row" id="machineChecks">
+                <label class="checkbox-field machine-check"><input type="checkbox" id="machineAlloyForge" checked> Alloy Forge / Metal Alloyer</label>
+                <label class="checkbox-field machine-check"><input type="checkbox" id="machineSuperMixer" checked> Super Mixer</label>
+                <label class="checkbox-field machine-check"><input type="checkbox" id="machineRecrystalizer" checked> Recrystalizer</label>
+                <label class="checkbox-field machine-check"><input type="checkbox" id="machineRefabricator" checked> Refabricator</label>
+              </div>
+            </label>
+          </div>
+
+          <div class="alloy-config-row">
+            <label class="field-label">Rank &amp; display by role
+              <select id="rankTypeSelect"></select>
+            </label>
+          </div>
+
+          <div class="alloy-config-row size-row">
+            <label class="field-label">
+              Max alloy size: <strong id="alloySizeVal">4</strong>
+              <input type="range" id="alloySize" min="2" max="8" value="4" step="1">
+            </label>
+            <div id="slotHint" class="muted"></div>
+          </div>
+
+          <details class="filter-details">
+            <summary>Filter by material (optional)</summary>
+            <div class="alloy-config-row">
+              <label class="field-label">Mode
+                <select id="materialFilterMode">
+                  <option value="none">No filter</option>
+                  <option value="whitelist">Whitelist</option>
+                  <option value="blacklist">Blacklist</option>
+                </select>
+              </label>
+            </div>
+            <label class="field-label">Search materials
+              <input type="text" id="materialFilterSearch" placeholder="e.g. wool, steel…">
+            </label>
+            <div id="materialFilterPicker" class="material-picker"></div>
+            <div class="picker-toolbar">
+              <button id="materialFilterClearBtn" class="btn btn-ghost btn-sm" type="button">Deselect all</button>
+            </div>
+          </details>
+
+          <details class="filter-details">
+            <summary>Filter by trait (optional)</summary>
+            <p class="hint">Only alloys with <em>all</em> checked traits present will be shown.</p>
+            <div id="traitFilterList" class="chip-row"></div>
+            <div class="picker-toolbar">
+              <button id="traitFilterClearBtn" class="btn btn-ghost btn-sm" type="button">Deselect all</button>
+            </div>
+          </details>
+
+          <div class="alloy-config-row">
+            <label class="field-label">Search strategy
+              <select id="narrowModeSelect">
+                <option value="auto">Auto-narrow (recommended)</option>
+                <option value="dynamic">Dynamic filter</option>
+                <option value="additive">Additive alloying</option>
+                <option value="none">No narrowing (exhaustive)</option>
+              </select>
+            </label>
+          </div>
+          <p id="narrowModeWarning" class="warning-text" hidden></p>
+
+          <div class="alloy-config-row">
+            <button id="estimateTimeBtn" class="btn btn-ghost btn-sm" type="button">Estimate time</button>
+            <span id="estimateTimeResult" class="muted"></span>
+          </div>
+
+          <div id="comboEstimateHint" class="muted eligibility-hint"></div>
+          <div id="eligibilityHint" class="muted eligibility-hint"></div>
+
+          <button id="computeAlloysBtn" class="btn btn-primary" type="button">Apply filters &amp; compute rankings</button>
+
+          <div id="progressWrap" class="progress-wrap" hidden>
+            <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+            <span id="progressLabel" class="muted"></span>
+          </div>
+          <div id="alloyComputeMsg" class="muted"></div>
+        </div>
+
+        <div id="alloyResults" class="results-list"></div>
+        <div id="alloyPager" class="pager"></div>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
