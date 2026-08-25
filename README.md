@@ -2,6 +2,8 @@
 
 A material and alloy ranking calculator for the Minecraft Silent Gear mod. Drop in your material export, tell it what stat you want to optimize, and it ranks every material and forged alloy from best to worst so you don't have to spend hours experimenting in game.
 
+Access the website at https://10carries.github.io/Silent-Gear-Solved/
+
 ## What it does
 
 Silent Gear has a lot of materials that can be forged together into alloys with different stats. Figuring out the single best alloy for, say, maximum durability is not something you want to work out by hand. This tool does it for you:
