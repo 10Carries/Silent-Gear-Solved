@@ -1,3 +1,5 @@
+**THE WEBSITE DOES *NOT* RUN IF YOU SWITCH TO A DIFFERENT TAB. IDK HOW TO FIX THIS SO JUST DEAL WITH IT**
+
 # Silent Gear Solved
 
 A material and alloy ranking calculator for the Minecraft Silent Gear mod. Drop in your material export, tell it what stat you want to optimize, and it ranks every material and forged alloy from best to worst so you don't have to spend hours experimenting in game.
