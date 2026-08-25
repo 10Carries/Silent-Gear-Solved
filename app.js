@@ -31,7 +31,7 @@
   const ADDITIVE_START_K = 4; // additive alloying's default initial brute-force size
   const ADDITIVE_BEAM_WIDTH = 10000; // additive alloying keeps this many alloys between rounds
   const ADDITIVE_ALT_START_K = 3; // alternate starting size, used when it's estimated to be cheaper
-  const ADDITIVE_ALT_BEAM_WIDTH = 100000; // wider beam for the alternate size-3 starting round only
+  const ADDITIVE_ALT_BEAM_WIDTH = 25000; // wider beam for the alternate size-3 starting round only
   const CHUNK_SIZE = 4000;
 
   const SYNERGY_MULTI = 1.1;
